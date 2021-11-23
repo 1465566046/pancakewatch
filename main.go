@@ -1,10 +1,12 @@
 package main
 
 import (
+	"os"
 	"pancakewatch/pcwdb"
 	"pancakewatch/route"
 
 	"github.com/gin-gonic/gin"
+	"github.com/twilio/twilio-go"
 )
 
 func main() {
@@ -23,9 +25,13 @@ func main() {
 	}
 	defer db.Close()
 
-	check(db)
-
 	r.POST("/subscribe", route.Subscribe(db))
 
+	client := twilio.NewRestClientWithParams(twilio.RestClientParams{
+		Username:   os.Getenv("USERNAME"),
+		Password:   os.Getenv("PASSWORD"),
+		AccountSid: os.Getenv("ACCOUNT_SID"),
+	})
+	go runChecker(client, db)
 	r.Run()
 }

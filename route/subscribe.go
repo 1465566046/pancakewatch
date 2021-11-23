@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"pancakewatch/pancakeswap"
 	"pancakewatch/pcwdb"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -30,7 +31,16 @@ func Subscribe(db pcwdb.DB) func(*gin.Context) {
 			c.String(http.StatusBadRequest, "invalid token address")
 			return
 		}
-		sub := pcwdb.Subscription{PhoneNumber: subForm.PhoneNumber, TargetPrice: subForm.TargetPrice}
+		isTargetUnder := false
+		price, err := strconv.ParseFloat(token.Data.Price, 32)
+		if err != nil {
+			c.String(http.StatusBadRequest, "invalid token price")
+			return
+		}
+		if subForm.TargetPrice < float32(price) {
+			isTargetUnder = true
+		}
+		sub := pcwdb.Subscription{PhoneNumber: subForm.PhoneNumber, TargetPrice: subForm.TargetPrice, IsTargetUnder: isTargetUnder}
 		if err := db.Subscribe(subForm.TokenAddress, sub); err != nil {
 			c.Error(err)
 			return

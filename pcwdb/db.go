@@ -78,27 +78,34 @@ func (db DB) Unsubscribe(address string, phone int) error {
 	return err
 }
 
-// ForEach will iterate over each address in the database.
+// ForEachAsync will iterate over each address in the database.
+// Each interation will be run in its own Goroutine.
 // It will call fn, passing it the address and subscriptions at the address.
-func (db DB) ForEach(fn func(string, []Subscription) error) error {
+func (db DB) ForEachAsync(fn func(string, []Subscription) error) chan error {
 	items := db.internalDB.Items()
+	errs := make(chan error)
 	for {
 		address, subsJSON, err := items.Next()
 		if err == pogreb.ErrIterationDone {
 			break
 		}
 		if err != nil {
-			return err
+			errs <- err
+			return errs
 		}
-		var subs []Subscription
-		if err := json.Unmarshal(subsJSON, &subs); err != nil {
-			return err
-		}
-		if err := fn(string(address), subs); err != nil {
-			return err
-		}
+		go func() {
+			var subs []Subscription
+			if err := json.Unmarshal(subsJSON, &subs); err != nil {
+				errs <- err
+				return
+			}
+			if err := fn(string(address), subs); err != nil {
+				errs <- err
+				return
+			}
+		}()
 	}
-	return nil
+	return errs
 }
 
 // Close will close the database.
