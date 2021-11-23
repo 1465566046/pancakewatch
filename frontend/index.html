@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link rel="stylesheet" href="https://unpkg.com/reset-css@5.0.1/reset.css" />
+    <link rel="stylesheet" href="./index.css" />
+
+    <title>PancakeWatch</title>
+  </head>
+  <body>
+    <header class="header">
+      <img class="header__logo" src="./logo.png" />
+      <h1 class="header__title">PancakeWatch</h1>
+    </header>
+
+    <form class="subscription-form" method="POST" action="/subscribe">
+      <input
+        type="text"
+        name="token-address"
+        placeholder="Token Address"
+        class="subscription-form__input"
+        required
+      />
+      <input
+        type="number"
+        name="phone-number"
+        placeholder="Phone Number"
+        class="subscription-form__input"
+        required
+      />
+      <input
+        type="number"
+        name="target-price"
+        step="any"
+        placeholder="Target Price"
+        class="subscription-form__input"
+        required
+      />
+      <input
+        type="submit"
+        value="Subscribe"
+        class="subscription-form__input subscription-form__input--submit"
+      />
+    </form>
+  </body>
+</html>
